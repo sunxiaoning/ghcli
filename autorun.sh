@@ -20,14 +20,27 @@ install-gh() {
 auth-gh() {
   echo "Auth login gh ..."
   if gh auth status &>/dev/null; then
-    return 0
+    exit 0
   else
-    GH_TOKEN=$(<.gh_token.txt)
-    if [ -z "$GH_TOKEN" ]; then
-      echo "Error: Personal Access Token not found."
+    local gh_token=${GH_TOKEN:-""}
+    unset GH_TOKEN
+    GH_TOKEN_FILE=${GH_TOKEN_FILE:-".gh_token.txt"}
+
+    if [[ -z "${gh_token}" ]]; then
+      echo "gh_token not set, try to load from file ..."
+      if [[ ! -f "${GH_TOKEN_FILE}" ]]; then
+        echo "Error: GH_TOKEN_FILE: ${GH_TOKEN_FILE} not found!"
+        exit 1
+      fi
+      gh_token=$(cat "${GH_TOKEN_FILE}")
+    fi
+
+    if [[ -z "${gh_token}" ]]; then
+      echo "gh_token can't be empty!"
       exit 1
     fi
-    echo "$GH_TOKEN" | gh auth login --with-token
+    echo "${gh_token}" | gh auth login --with-token
+    unset gh_token
   fi
 }
 
