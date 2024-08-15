@@ -3,17 +3,36 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
+GIT_VERSION=${GIT_VERSION:-"2.43.5"}
+
 GH_NAME=${GH_NAME:-"gh"}
 GH_VERSION=${GH_VERSION:-"2.53.0"}
 ARCH=${ARCH:-"amd64"}
 RPM_GH_URL=https://github.com/cli/cli/releases/download/v${GH_VERSION}/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm
 
+install-git() {
+  echo "Install git ..."
+  if ! rpm -q "git-${GIT_VERSION}" &> /dev/null; then
+    yum -y install "git-${GIT_VERSION}"
+  fi
+  
+  if ! rpm -q "git-${GIT_VERSION}" &> /dev/null; then
+    echo "Install git-${GIT_VERSION} failed!" >&2
+    exit 1
+  fi
+}
+
 install-gh() {
   echo "Install gh ..."
-  if [ "$(command -v gh)" = "" ]; then
+  if ! rpm -q "${GH_NAME}-${GH_VERSION}" &> /dev/null; then
     curl -Lo "/tmp/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm" "${RPM_GH_URL}"
     yum -y install /tmp/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm
-    rm -f "/tmp/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm"
+    # rm -f "/tmp/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm"
+  fi
+
+  if ! rpm -q "${GH_NAME}-${GH_VERSION}" &> /dev/null; then
+    echo "Install ${GH_NAME}-${GH_VERSION} failed!" >&2
+    exit 1
   fi
 }
 
@@ -46,6 +65,9 @@ auth-gh() {
 
 
 main() {
+
+    # Here, Git is manually installed to specify the desired Git version. In fact, when gh is installed, Git will be automatically installed.
+    install-git
     install-gh
     auth-gh
 }
