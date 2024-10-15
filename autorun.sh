@@ -12,7 +12,7 @@ ARCH=${ARCH:-"amd64"}
 REPO_ORIGIN_SOURCE=${REPO_ORIGIN_SOURCE:-"0"}
 
 RPM_GH_GITHUB_REPO="github.com/cli/cli"
-RPM_GH_GITEE_REPO="gitee.com/williamsun"
+RPM_GH_GITEE_REPO="gitee.com/williamsun/ghcli"
 
 RPM_GH_REPO=${RPM_GH_REPO:-${RPM_GH_GITHUB_REPO}}
 
@@ -37,6 +37,8 @@ install-gh() {
   fi
 
   if ! rpm -q "${GH_NAME}-${GH_VERSION}" &>/dev/null; then
+    echo "download ghcli from: https://${RPM_GH_REPO}/releases/download/v${GH_VERSION}/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm"
+
     curl -fsSLo "/tmp/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm" "https://${RPM_GH_REPO}/releases/download/v${GH_VERSION}/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm"
     yum -y install /tmp/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm
     rm -f "/tmp/${GH_NAME}_${GH_VERSION}_linux_${ARCH}.rpm"
